@@ -16,7 +16,6 @@ def convert_resnet_parms(resnet_block: EncodecResnetBlock) -> ResnetParams:
 def forward_resnet(params: ResnetParams, input_: Array) -> Array:
     conv1d_0_param, conv1d_1_param, conv1d_shortcut_param = params
     shortcut_input = forward_conv1d(conv1d_shortcut_param, input_)
-    i=0
     for conv1d in (conv1d_0_param, conv1d_1_param):
         input_ = jax.nn.elu(input_)
         input_ =  forward_conv1d(conv1d, input_)
