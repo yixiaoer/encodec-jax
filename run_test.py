@@ -4,6 +4,7 @@ from transformers import EncodecModel
 from encodec.conv1d import test_forward_conv1d
 from encodec.resnet import test_forward_resnet
 from encodec.lstm import test_forward_lstm
+from encodec.encoder import test_forward_encoder
 
 def main():
     model = EncodecModel.from_pretrained("facebook/encodec_24khz")
@@ -12,6 +13,7 @@ def main():
         test_forward_conv1d(model)
         test_forward_resnet(model)
         test_forward_lstm(model)
+        test_forward_encoder(model)
     print('✅ All tests passed!')
 
 if __name__ == '__main__':

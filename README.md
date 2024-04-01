@@ -7,7 +7,10 @@ It is supported by Cloud TPUs from Google's [TPU Research Cloud (TRC)](https://s
 ## Roadmap
 
 - [ ] Model architecture
-    - [🤔] EnCodec (encodec_24khz)
+    - [ ] EnCodec (encodec_24khz) 🤔
+      - [x] EncodecEncoder
+      - [ ] EncodecResidualVectorQuantizer
+      - [ ] EncodecDecoder
     - [ ] EnCodec (encodec_48khz)
 
 ## Install

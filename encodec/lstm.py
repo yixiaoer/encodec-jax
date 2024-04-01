@@ -1,3 +1,5 @@
+from typing import NamedTuple
+
 import einops as op
 import jax
 from jax import Array
@@ -8,11 +10,21 @@ from transformers.models.encodec.modeling_encodec import EncodecLSTM
 
 from encodec.array_conversion import jax2pt, pt2jax
 
-LSTMParams = tuple[tuple[Array, Array, Array, Array], tuple[Array, Array, Array, Array], int, int]
+class LSTM_layer(NamedTuple):
+    weight_hh_l: Array
+    weight_ih_l: Array
+    bias_hh_l: Array
+    bias_ih_l: Array
+
+class LSTMParams(NamedTuple):
+    layer0: LSTM_layer
+    layer1: LSTM_layer
+    num_layers: int
+    hidden_size: int
 
 def convert_lstm_parms(lstm: EncodecLSTM) -> LSTMParams:
-    return ((pt2jax(lstm.lstm.weight_hh_l0), pt2jax(lstm.lstm.weight_ih_l0), pt2jax(lstm.lstm.bias_hh_l0), pt2jax(lstm.lstm.bias_ih_l0)), 
-    (pt2jax(lstm.lstm.weight_hh_l1), pt2jax(lstm.lstm.weight_ih_l1), pt2jax(lstm.lstm.bias_hh_l1), pt2jax(lstm.lstm.bias_ih_l1)), 
+    return LSTMParams(LSTM_layer(pt2jax(lstm.lstm.weight_hh_l0), pt2jax(lstm.lstm.weight_ih_l0), pt2jax(lstm.lstm.bias_hh_l0), pt2jax(lstm.lstm.bias_ih_l0)), 
+    LSTM_layer(pt2jax(lstm.lstm.weight_hh_l1), pt2jax(lstm.lstm.weight_ih_l1), pt2jax(lstm.lstm.bias_hh_l1), pt2jax(lstm.lstm.bias_ih_l1)), 
     lstm.lstm.num_layers, 
     lstm.lstm.hidden_size,)
 
