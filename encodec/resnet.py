@@ -8,15 +8,15 @@ from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecResnetBlock
 
 from encodec.array_conversion import jax2pt, pt2jax
-from encodec.conv1d import Conv1dParams, convert_conv1d_parms, forward_conv1d
+from encodec.conv1d import Conv1dParams, convert_conv1d_params, forward_conv1d
 
 class ResnetParams(NamedTuple):
     conv1d_1: Conv1dParams
     conv1d_3: Conv1dParams
     conv1d_shortcut: Conv1dParams
 
-def convert_resnet_parms(resnet_block: EncodecResnetBlock) -> ResnetParams:
-    return ResnetParams(convert_conv1d_parms(resnet_block.block[1]), convert_conv1d_parms(resnet_block.block[3]), convert_conv1d_parms(resnet_block.shortcut))
+def convert_resnet_params(resnet_block: EncodecResnetBlock) -> ResnetParams:
+    return ResnetParams(convert_conv1d_params(resnet_block.block[1]), convert_conv1d_params(resnet_block.block[3]), convert_conv1d_params(resnet_block.shortcut))
 
 def forward_resnet(params: ResnetParams, input_: Array) -> Array:
     conv1d_0_param, conv1d_1_param, conv1d_shortcut_param = params
@@ -39,7 +39,7 @@ def test_forward_resnet(model: EncodecModel) -> None:
 
     out_pt = resnet_block(x_pt)  # torch.Size([4, 32, 20])
 
-    resnet_param = convert_resnet_parms(resnet_block)
+    resnet_param = convert_resnet_params(resnet_block)
     out = forward_resnet(resnet_param, x)
 
     assert jnp.allclose(out, pt2jax(out_pt), atol=1e-5)

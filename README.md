@@ -1,6 +1,6 @@
 # EnCodec JAX
 
-This project is the JAX implementation of [EnCodec](https://github.com/facebookresearch/encodec).
+This project is the JAX implementation of [EnCodec](https://github.com/facebookresearch/encodec), deep learning based audio codec.
 
 It is supported by Cloud TPUs from Google's [TPU Research Cloud (TRC)](https://sites.research.google/trc/about/).
 
@@ -10,7 +10,7 @@ It is supported by Cloud TPUs from Google's [TPU Research Cloud (TRC)](https://s
     - [ ] EnCodec (encodec_24khz) 🤔
       - [x] EncodecEncoder
       - [ ] EncodecResidualVectorQuantizer
-      - [ ] EncodecDecoder
+      - [x] EncodecDecoder
     - [ ] EnCodec (encodec_48khz)
 
 ## Install

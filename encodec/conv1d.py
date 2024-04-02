@@ -17,7 +17,7 @@ class Conv1dParams(NamedTuple):
     pad_mode: str
     padding_len: int
 
-def convert_conv1d_parms(conv1d: EncodecConv1d) -> Conv1dParams:
+def convert_conv1d_params(conv1d: EncodecConv1d) -> Conv1dParams:
     padding_len = (conv1d.conv.kernel_size[0] - 1) * conv1d.conv.dilation[0] + 1 - conv1d.conv.stride[0]
     return Conv1dParams(pt2jax(conv1d.conv.weight.data), pt2jax(conv1d.conv.bias.data), conv1d.conv.dilation, conv1d.conv.stride, conv1d.pad_mode, padding_len)
 
@@ -57,7 +57,7 @@ def test_forward_conv1d(model: EncodecModel) -> None:
 
     out_pt = conv1d_pt(x_pt)  # padding in EncodecConv1d before applying conv1d
 
-    conv1d_param = convert_conv1d_parms(conv1d_pt)
+    conv1d_param = convert_conv1d_params(conv1d_pt)
     out = forward_conv1d(conv1d_param, x)
 
     assert jnp.allclose(out, pt2jax(out_pt), atol=1e-5)

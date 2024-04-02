@@ -22,7 +22,7 @@ class LSTMParams(NamedTuple):
     num_layers: int
     hidden_size: int
 
-def convert_lstm_parms(lstm: EncodecLSTM) -> LSTMParams:
+def convert_lstm_params(lstm: EncodecLSTM) -> LSTMParams:
     return LSTMParams(LSTM_layer(pt2jax(lstm.lstm.weight_hh_l0), pt2jax(lstm.lstm.weight_ih_l0), pt2jax(lstm.lstm.bias_hh_l0), pt2jax(lstm.lstm.bias_ih_l0)), 
     LSTM_layer(pt2jax(lstm.lstm.weight_hh_l1), pt2jax(lstm.lstm.weight_ih_l1), pt2jax(lstm.lstm.bias_hh_l1), pt2jax(lstm.lstm.bias_ih_l1)), 
     lstm.lstm.num_layers, 
@@ -64,7 +64,7 @@ def test_forward_lstm(model: EncodecModel) -> None:
 
     out_pt = lstm(x_pt)
 
-    lstm_params = convert_lstm_parms(lstm)
+    lstm_params = convert_lstm_params(lstm)
     out = forward_lstm(lstm_params, x)
 
     assert jnp.allclose(out, pt2jax(out_pt), atol=1e-5)
