@@ -7,7 +7,7 @@ import jax.random as jrand
 from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecConvTranspose1d
 
-from encodec.array_conversion import jax2pt, pt2jax
+from .array_conversion import jax2pt, pt2jax
 
 # TODO: eliminate this
 trim_right_ratio = 1.0  # model.config: "trim_right_ratio": 1.0

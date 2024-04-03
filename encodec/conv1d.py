@@ -7,7 +7,7 @@ import jax.random as jrand
 from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecConv1d
 
-from encodec.array_conversion import jax2pt, pt2jax
+from .array_conversion import jax2pt, pt2jax
 
 class Conv1dParams(NamedTuple):
     weight: Array

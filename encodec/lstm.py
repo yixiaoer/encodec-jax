@@ -8,7 +8,7 @@ import jax.random as jrand
 from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecLSTM
 
-from encodec.array_conversion import jax2pt, pt2jax
+from .array_conversion import jax2pt, pt2jax
 
 class LSTM_layer(NamedTuple):
     weight_hh_l: Array

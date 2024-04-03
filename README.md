@@ -1,17 +1,54 @@
 # EnCodec JAX
 
-This project is the JAX implementation of [EnCodec](https://github.com/facebookresearch/encodec), deep learning based audio codec.
+This project is the JAX implementation of [EnCodec](https://github.com/facebookresearch/encodec), a deep learning based audio codec.
 
 It is supported by Cloud TPUs from Google's [TPU Research Cloud (TRC)](https://sites.research.google/trc/about/).
 
 ## Roadmap
 
 - [ ] Model architecture
-    - [ ] EnCodec (encodec_24khz) 🤔
-      - [x] EncodecEncoder
-      - [ ] EncodecResidualVectorQuantizer
-      - [x] EncodecDecoder
+    - [x] EnCodec (encodec_24khz) 🤔
     - [ ] EnCodec (encodec_48khz)
+
+## Usage
+
+```python
+from datasets import Audio, load_dataset
+import jax; jax.config.update('jax_default_matmul_precision', jax.lax.Precision.HIGHEST)
+import jax.numpy as jnp
+from transformers import AutoProcessor, EncodecModel
+
+from encodec.array_conversion import pt2jax
+from encodec.encodec_model import convert_encodec_model_params, decode_encodec, encode_encodec, foward_encodec
+
+model = EncodecModel.from_pretrained("facebook/encodec_24khz")
+processor = AutoProcessor.from_pretrained("facebook/encodec_24khz")
+librispeech_dummy = load_dataset("hf-internal-testing/librispeech_asr_dummy", "clean", split="validation", trust_remote_code=True)
+librispeech_dummy = librispeech_dummy.cast_column("audio", Audio(sampling_rate=processor.sampling_rate))
+audio_sample = librispeech_dummy[-1]["audio"]["array"]
+bandwidth = 6
+
+inputs_pt = processor(raw_audio=audio_sample, sampling_rate=processor.sampling_rate, return_tensors="pt")
+encoder_outputs_pt = model.encode(inputs_pt["input_values"], inputs_pt["padding_mask"], bandwidth=bandwidth)
+out_encode_pt = encoder_outputs_pt.audio_codes
+out_decode_pt = model.decode(encoder_outputs_pt.audio_codes, encoder_outputs_pt.audio_scales, inputs_pt["padding_mask"])[0]
+out_forward_pt = model(inputs_pt["input_values"], inputs_pt["padding_mask"], bandwidth).audio_values
+
+cpu_device = jax.devices('cpu')[0]
+# to make JAX calculation precision the same with PyTorch
+with jax.default_device(cpu_device):
+    inputs = processor(raw_audio=audio_sample, sampling_rate=processor.sampling_rate, return_tensors="jax")
+    encodec_params = convert_encodec_model_params(model, bandwidth)
+    encoder_params, quantizer_params, decoder = encodec_params
+    out_encode = encode_encodec(encodec_params, inputs["input_values"])
+    out_decode = decode_encodec(encodec_params, out_encode, inputs["padding_mask"])
+    out_forward = foward_encodec(encodec_params, inputs["input_values"], inputs["padding_mask"], bandwidth)
+
+assert jnp.allclose(out_encode, pt2jax(out_encode_pt), atol=1e-5)
+assert jnp.allclose(out_decode, pt2jax(out_decode_pt), atol=1e-5)
+assert jnp.allclose(out_forward, pt2jax(out_forward_pt), atol=1e-5)
+print(out_decode)
+```
 
 ## Install
 

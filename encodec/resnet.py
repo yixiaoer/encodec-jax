@@ -7,8 +7,8 @@ import jax.random as jrand
 from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecResnetBlock
 
-from encodec.array_conversion import jax2pt, pt2jax
-from encodec.conv1d import Conv1dParams, convert_conv1d_params, forward_conv1d
+from .array_conversion import jax2pt, pt2jax
+from .conv1d import Conv1dParams, convert_conv1d_params, forward_conv1d
 
 class ResnetParams(NamedTuple):
     conv1d_1: Conv1dParams

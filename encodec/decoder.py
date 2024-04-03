@@ -6,11 +6,11 @@ from transformers import EncodecModel
 from transformers.models.encodec.modeling_encodec import EncodecConv1d, EncodecConvTranspose1d, EncodecDecoder, EncodecLSTM, EncodecResnetBlock
 from torch.nn import ELU
 
-from encodec.array_conversion import jax2pt, pt2jax
-from encodec.conv1d import Conv1dParams, convert_conv1d_params, forward_conv1d
-from encodec.convtranspose1d import ConvTranspose1dParams, convert_convtranspose1d_params, forward_convtranspose1d
-from encodec.lstm import LSTMParams, convert_lstm_params, forward_lstm
-from encodec.resnet import ResnetParams, convert_resnet_params, forward_resnet
+from .array_conversion import jax2pt, pt2jax
+from .conv1d import Conv1dParams, convert_conv1d_params, forward_conv1d
+from .convtranspose1d import ConvTranspose1dParams, convert_convtranspose1d_params, forward_convtranspose1d
+from .lstm import LSTMParams, convert_lstm_params, forward_lstm
+from .resnet import ResnetParams, convert_resnet_params, forward_resnet
 
 DecoderParams = list[Conv1dParams | ResnetParams | str | LSTMParams | ConvTranspose1dParams]
 

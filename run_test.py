@@ -5,7 +5,10 @@ from encodec.conv1d import test_forward_conv1d
 from encodec.resnet import test_forward_resnet
 from encodec.lstm import test_forward_lstm
 from encodec.encoder import test_forward_encoder
-
+from encodec.vq import test_methods_vq
+from encodec.vq_residual import test_methods_rvq
+from encodec.encodec_model import test_methods_encodec
+trust_remote_code=True
 def main():
     model = EncodecModel.from_pretrained("facebook/encodec_24khz")
     cpu_device = jax.devices('cpu')[0]
@@ -14,6 +17,9 @@ def main():
         test_forward_resnet(model)
         test_forward_lstm(model)
         test_forward_encoder(model)
+        test_methods_vq(model)
+        test_methods_rvq(model)
+        test_methods_encodec(model)
     print('✅ All tests passed!')
 
 if __name__ == '__main__':

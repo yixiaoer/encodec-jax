@@ -2,3 +2,6 @@ mypy
 jax
 torch
 transformers
+datasets
+soundfile
+librosa
