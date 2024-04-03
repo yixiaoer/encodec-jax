@@ -21,7 +21,13 @@ class ConvTranspose1dParams(NamedTuple):
 
 def convert_convtranspose1d_params(convtranspose1d: EncodecConvTranspose1d) -> ConvTranspose1dParams:
     padding_len = convtranspose1d.conv.kernel_size[0] - convtranspose1d.conv.stride[0]
-    return ConvTranspose1dParams(pt2jax(convtranspose1d.conv.weight.data), pt2jax(convtranspose1d.conv.bias.data), convtranspose1d.conv.dilation, convtranspose1d.conv.stride, padding_len)
+    return ConvTranspose1dParams(
+        pt2jax(convtranspose1d.conv.weight.data),
+        pt2jax(convtranspose1d.conv.bias.data),
+        convtranspose1d.conv.dilation,
+        convtranspose1d.conv.stride,
+        padding_len,
+    )
 
 def forward_convtranspose1d(params: ConvTranspose1dParams, input_: Array) -> Array:
     weight, bias, dilation, stride, padding_len = params
@@ -29,8 +35,8 @@ def forward_convtranspose1d(params: ConvTranspose1dParams, input_: Array) -> Arr
     padding_l = padding_len - padding_r
 
     result = lax.conv_transpose(
-        input_.transpose([0, 2, 1]),
-        weight.transpose([2, 1, 0]),
+        input_.transpose(0, 2, 1),
+        weight.transpose(2, 1, 0),
         strides=stride,
         rhs_dilation=dilation,
         padding='VALID',
@@ -38,9 +44,9 @@ def forward_convtranspose1d(params: ConvTranspose1dParams, input_: Array) -> Arr
         transpose_kernel=True,
         precision='highest',
     )
-    result = (result + bias).transpose([0, 2, 1])
+    result = (result + bias).transpose(0, 2, 1)
 
-    return result[:, :, padding_l:result.shape[-1] - padding_r] 
+    return result[:, :, padding_l : result.shape[-1] - padding_r] 
 
 def test_forward_convtranspose1d(model: EncodecModel) -> None:
     batch_size, input_channels, len_ = 4, 512, 10

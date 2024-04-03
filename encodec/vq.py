@@ -16,7 +16,7 @@ def convert_vq_params(vq: EncodecVectorQuantization) -> VectorQuantizationParams
 
 def quantize_vq(params: VectorQuantizationParams, hidden_states: Array) -> Array:
     embed = params.embed
-    distances = jnp.sum(hidden_states ** 2, axis=1)[:,None] - 2 * hidden_states @ embed + jnp.sum(embed ** 2, axis=0)[None,:]
+    distances = jnp.sum(hidden_states ** 2, axis=1)[:, None] - 2 * hidden_states @ embed + jnp.sum(embed ** 2, axis=0)[None,:]
     embed_indices = jnp.argmin(distances, axis=-1)
     return embed_indices
 

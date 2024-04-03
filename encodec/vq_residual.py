@@ -17,25 +17,28 @@ num_quantizers_ = 32  # 32, model.config.num_quantizers
 ResidualVectorQuantizerParams = list[VectorQuantizationParams]
 
 def get_num_quantizers(bandwidth: float | None = None) -> int:
-    if bandwidth is not None and bandwidth > 0.0:
-        num_quantizers = math.floor(bandwidth * 1000 / (math.log2(codebook_size) * frame_rate))
-        num_quantizers = max(1, num_quantizers)
-    return int(num_quantizers) if bandwidth is not None else num_quantizers_
+    if bandwidth is None:
+        return num_quantizers_
+    num_quantizers = math.floor(bandwidth * 1000 / (math.log2(codebook_size) * frame_rate))
+    num_quantizers = max(1, num_quantizers)
+    return int(num_quantizers)
 
 def convert_rvq_params(rvq: EncodecResidualVectorQuantizer, bandwidth: float| None = None) -> ResidualVectorQuantizerParams:
     num_quantizers = get_num_quantizers(bandwidth)
-    return [convert_vq_params(layer) for layer in rvq.layers[:num_quantizers]]
+    return [convert_vq_params(layer) for layer in rvq.layers[: num_quantizers]]
 
 def encode_rvq(params: ResidualVectorQuantizerParams, input_: Array) -> Array:
     embed_indices = []
+
     for param in params:
-        if isinstance(param, VectorQuantizationParams):
-            param_indices = encode_vq(param, input_)
-            quantized = decode_vq(param, param_indices)
-            input_ = input_ - quantized
-            embed_indices.append(param_indices)
-        else:
+        if not isinstance(param, VectorQuantizationParams):
             raise NotImplementedError('Not support type for layers in ResidualVectorQuantizerParams')
+
+        param_indices = encode_vq(param, input_)
+        quantized = decode_vq(param, param_indices)
+        input_ -= quantized
+        embed_indices.append(param_indices)
+
     return jnp.array(embed_indices)
 
 def decode_rvq(params: ResidualVectorQuantizerParams, embed_indices: Array) -> Array:

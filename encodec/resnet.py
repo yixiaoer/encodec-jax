@@ -16,7 +16,11 @@ class ResnetParams(NamedTuple):
     conv1d_shortcut: Conv1dParams
 
 def convert_resnet_params(resnet_block: EncodecResnetBlock) -> ResnetParams:
-    return ResnetParams(convert_conv1d_params(resnet_block.block[1]), convert_conv1d_params(resnet_block.block[3]), convert_conv1d_params(resnet_block.shortcut))
+    return ResnetParams(
+        convert_conv1d_params(resnet_block.block[1]),
+        convert_conv1d_params(resnet_block.block[3]),
+        convert_conv1d_params(resnet_block.shortcut),
+    )
 
 def forward_resnet(params: ResnetParams, input_: Array) -> Array:
     conv1d_0_param, conv1d_1_param, conv1d_shortcut_param = params

@@ -19,7 +19,14 @@ class Conv1dParams(NamedTuple):
 
 def convert_conv1d_params(conv1d: EncodecConv1d) -> Conv1dParams:
     padding_len = (conv1d.conv.kernel_size[0] - 1) * conv1d.conv.dilation[0] + 1 - conv1d.conv.stride[0]
-    return Conv1dParams(pt2jax(conv1d.conv.weight.data), pt2jax(conv1d.conv.bias.data), conv1d.conv.dilation, conv1d.conv.stride, conv1d.pad_mode, padding_len)
+    return Conv1dParams(
+        pt2jax(conv1d.conv.weight.data),
+        pt2jax(conv1d.conv.bias.data),
+        conv1d.conv.dilation,
+        conv1d.conv.stride,
+        conv1d.pad_mode,
+        padding_len,
+    )
 
 def forward_conv1d(params: Conv1dParams, input_: Array) -> Array:
     weight, bias, dilation, stride, pad_mode, padding_len = params
@@ -31,18 +38,19 @@ def forward_conv1d(params: Conv1dParams, input_: Array) -> Array:
         pad_r = padding_max - len_ + 1
         input_ = jnp.pad(input_, pad_width=((0, 0), (0, 0), (0, pad_r)))
     input_ = jnp.pad(input_, pad_width=((0, 0), (0, 0), (padding_len, padding_r)), mode=pad_mode)
-    input_ = input_.transpose([0, 2, 1]) if pad_r is None else input_[:,:,:-pad_r].transpose([0, 2, 1])
+    input_ = input_.transpose(0, 2, 1) if pad_r is None else input_[:, :, : -pad_r].transpose(0, 2, 1)
 
     result = lax.conv_general_dilated(
         input_,
-        weight.transpose([2, 1, 0]),  # kernerl_size, in, out
+        weight.transpose(2, 1, 0),  # kernerl_size, in, out
         window_strides=stride,
         rhs_dilation=dilation,
         padding='VALID',
         dimension_numbers=('NWC', 'WIO', 'NWC'),  # input_, weight, output
         precision='highest',
     )
-    return (result + bias).transpose([0, 2, 1])
+
+    return (result + bias).transpose(0, 2, 1)
 
 def test_forward_conv1d(model: EncodecModel) -> None:
     # batch_size, input_channels, len_ = 4, 1, 10
